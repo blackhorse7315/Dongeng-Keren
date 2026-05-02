@@ -40,114 +40,133 @@
             animation: spin 0.8s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .modal-overlay { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
-        .active-tap { transition: transform 0.1s; }
-        .active-tap:active { transform: scale(0.95); }
+        .active-tap:active { transform: scale(0.96); transition: transform 0.1s; }
+        .story-text { line-height: 1.8; color: #1e293b; }
+        
+        /* Mobile Specific UI */
+        @media (max-width: 768px) {
+            .mobile-padding { padding-bottom: 120px; }
+            .floating-input {
+                position: sticky;
+                bottom: 16px;
+                z-index: 40;
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen p-3 md:p-8">
+<body class="min-h-screen p-3 md:p-8 text-slate-900 mobile-padding">
 
-    <div class="max-w-6xl mx-auto">
+    <div class="max-w-4xl mx-auto">
         <!-- Header -->
         <header class="text-center mb-6 flex flex-col items-center">
             <h1 class="text-3xl md:text-5xl font-bold text-indigo-600 kids-font mb-1">✨ Petualangan Imajinasi ✨</h1>
-            <p class="text-gray-500 mb-4 text-[10px] md:text-sm uppercase tracking-widest font-bold">Pembuat Cerita Anak Otomatis</p>
-            
-            <button id="btnInstall" class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-full shadow-lg font-bold flex items-center gap-2 active-tap text-xs animate-pulse">
-                <i class="fas fa-mobile-alt"></i> Pasang di HP
-            </button>
+            <p class="text-gray-500 text-[10px] uppercase tracking-widest font-bold">Didukung oleh Gemini 2.5 Flash</p>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            <!-- Story Viewer (Top on Mobile) -->
-            <div class="lg:col-span-2 order-1 lg:order-2">
-                <div id="displayArea" class="glass-morphism p-4 md:p-8 rounded-3xl shadow-2xl min-h-[400px] flex flex-col items-center justify-center relative overflow-hidden">
-                    
-                    <div id="welcomeMessage" class="text-center space-y-4 p-6">
-                        <div class="text-7xl">🎨</div>
-                        <h3 class="text-xl font-bold text-gray-500">Siap Berimajinasi?</h3>
-                        <p class="text-gray-400 text-xs">Tuliskan judul seru di bawah untuk memulai.</p>
-                    </div>
-
-                    <div id="loadingOverlay" class="hidden absolute inset-0 bg-white/95 z-20 flex flex-col items-center justify-center rounded-3xl p-6 text-center">
-                        <div class="loader mb-4"></div>
-                        <p id="loadingText" class="text-indigo-600 font-bold text-base mb-1">Menghubungi peri cerita...</p>
-                        <p class="text-gray-400 text-[10px] italic">Pastikan internetmu menyala ya!</p>
-                    </div>
-
-                    <div id="storyContent" class="hidden w-full space-y-6">
-                        <div class="w-full aspect-video rounded-2xl overflow-hidden bg-gray-100 relative shadow-md">
-                            <img id="generatedImage" src="" alt="Ilustrasi" class="w-full h-full object-cover hidden" onerror="this.style.display='none'">
-                            <div id="imageLoading" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 text-gray-400 gap-2">
-                                <i class="fas fa-palette fa-2x animate-bounce"></i>
-                                <span class="text-[10px]">Sedang menggambar...</span>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between gap-4 border-b pb-4">
-                            <h2 id="finalTitle" class="text-2xl font-bold text-indigo-700 kids-font flex-1 truncate"></h2>
-                            <div class="flex gap-2">
-                                <button id="btnPlayAudio" class="bg-green-500 text-white w-10 h-10 rounded-full shadow-lg flex items-center justify-center active-tap"><i class="fas fa-volume-up"></i></button>
-                                <button id="btnSave" class="bg-rose-500 text-white w-10 h-10 rounded-full shadow-lg flex items-center justify-center active-tap"><i class="fas fa-bookmark"></i></button>
-                            </div>
-                        </div>
-
-                        <div id="storyBody" class="text-sm md:text-base text-gray-700 leading-relaxed space-y-4 whitespace-pre-wrap text-justify"></div>
-                    </div>
-                </div>
+        <!-- Story Display Area -->
+        <div id="displayArea" class="glass-morphism p-4 md:p-10 rounded-3xl shadow-2xl min-h-[450px] flex flex-col relative overflow-hidden mb-6">
+            
+            <!-- Welcome View -->
+            <div id="welcomeMessage" class="text-center space-y-6 my-auto">
+                <div class="text-8xl">🚀</div>
+                <h3 class="text-2xl font-bold text-slate-700">Ayo Buat Keajaiban!</h3>
+                <p class="text-slate-500 text-sm max-w-sm mx-auto">Ketikkan judul apa saja, dan Gemini akan langsung membuatkan cerita seru serta gambarnya untukmu.</p>
             </div>
 
-            <!-- Inputs (Bottom on Mobile) -->
-            <div class="lg:col-span-1 space-y-5 order-2 lg:order-1">
-                <div class="glass-morphism p-5 rounded-3xl shadow-xl">
-                    <h2 class="text-base font-bold mb-3 text-gray-800">Mulai Petualangan Baru</h2>
-                    <div class="space-y-3">
-                        <input type="text" id="storyTitle" placeholder="Contoh: Kelinci Berbaju Besi" 
-                            class="w-full p-4 rounded-2xl border border-gray-200 outline-none focus:ring-2 focus:ring-indigo-400 text-sm md:text-base shadow-sm">
-                        <button id="btnGenerate" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 active-tap">
-                            <i class="fas fa-magic"></i> Buat Cerita!
+            <!-- Loading View -->
+            <div id="loadingOverlay" class="hidden absolute inset-0 bg-white/95 z-20 flex flex-col items-center justify-center p-6 text-center">
+                <div class="loader mb-4"></div>
+                <p id="loadingText" class="text-indigo-600 font-bold text-lg">Gemini sedang merangkai kata...</p>
+                <p class="text-gray-400 text-xs italic mt-2">Melukis ilustrasi & menyiapkan narasi...</p>
+            </div>
+
+            <!-- Story View -->
+            <div id="storyContent" class="hidden w-full space-y-8 animate-fade-in">
+                <!-- Image Section -->
+                <div class="w-full aspect-video rounded-3xl overflow-hidden bg-slate-100 relative shadow-xl group">
+                    <img id="generatedImage" src="" alt="Ilustrasi Cerita" class="w-full h-full object-cover opacity-0 transition-opacity duration-700">
+                    <div id="imageLoading" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-100 text-slate-400 gap-3">
+                        <i class="fas fa-palette fa-2xl animate-bounce"></i>
+                        <span class="text-[10px] font-medium">Gemini sedang melukis...</span>
+                    </div>
+                </div>
+
+                <!-- Action Toolbar -->
+                <div class="flex items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                    <h2 id="finalTitle" class="text-2xl md:text-3xl font-bold text-indigo-700 kids-font flex-1 truncate"></h2>
+                    <div class="flex gap-2">
+                        <button id="btnPlayAudio" title="Dengarkan Narasi" class="bg-green-500 text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center active-tap">
+                            <i class="fas fa-volume-up text-lg"></i>
+                        </button>
+                        <button id="btnSave" title="Simpan ke Koleksi" class="bg-rose-500 text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center active-tap">
+                            <i class="fas fa-bookmark text-lg"></i>
                         </button>
                     </div>
                 </div>
 
+                <!-- Story Text Section -->
+                <div id="storyBody" class="story-text text-base md:text-xl space-y-6 whitespace-pre-wrap text-justify pb-10"></div>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-2 space-y-4">
+                <div class="glass-morphism p-5 rounded-3xl shadow-xl floating-input">
+                    <div class="flex gap-2">
+                        <input type="text" id="storyTitle" placeholder="Misal: Petualangan Ke Mars..." 
+                            class="flex-1 p-4 rounded-2xl border-none bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-400 text-sm md:text-base shadow-inner">
+                        <button id="btnGenerate" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 rounded-2xl shadow-lg flex items-center justify-center active-tap transition-all">
+                            <i class="fas fa-magic"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-1">
                 <div class="glass-morphism p-5 rounded-3xl shadow-xl max-h-[300px] overflow-y-auto">
-                    <div class="flex items-center justify-between mb-3 sticky top-0 bg-white/95 z-10 py-1">
-                        <h2 class="text-base font-bold text-gray-800">Koleksiku</h2>
-                        <button id="btnClearAll" class="text-[10px] text-red-500 font-bold uppercase">Hapus</button>
+                    <div class="flex items-center justify-between mb-4 sticky top-0 bg-white/95 z-10 py-1">
+                        <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fas fa-history text-indigo-500"></i> Koleksiku
+                        </h2>
+                        <button id="btnClearAll" class="text-[10px] text-red-500 font-bold uppercase hover:underline">Hapus</button>
                     </div>
                     <div id="savedStoriesList" class="space-y-2"></div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- PWA Modal -->
-    <div id="installModal" class="hidden fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
-            <div class="text-center space-y-4">
-                <div class="w-16 h-16 bg-indigo-100 rounded-2xl mx-auto flex items-center justify-center text-indigo-600 text-3xl">
-                    <i class="fas fa-cloud-download-alt"></i>
-                </div>
-                <h3 class="text-lg font-bold">Pasang di Layar Utama</h3>
-                <p class="text-gray-500 text-xs">Buka aplikasi ini lebih cepat tanpa lewat browser!</p>
-                
-                <div id="iosInstructions" class="hidden text-left bg-indigo-50 p-4 rounded-2xl space-y-2 text-[10px]">
-                    <p class="font-bold">Untuk iPhone/Safari:</p>
-                    <ol class="list-decimal list-inside space-y-1">
-                        <li>Klik ikon <strong>'Bagikan'</strong> (kotak panah atas).</li>
-                        <li>Pilih <strong>'Add to Home Screen'</strong>.</li>
-                    </ol>
-                </div>
-
-                <button id="modalInstallAction" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg text-sm">Instal Sekarang</button>
-                <button id="closeModal" class="w-full text-gray-400 text-xs py-1">Nanti Saja</button>
-            </div>
+        <!-- Install Prompt -->
+        <div class="mt-8 text-center">
+            <button id="btnInstall" class="hidden bg-slate-800 text-white px-6 py-2 rounded-full text-xs font-bold active-tap shadow-lg">
+                <i class="fas fa-mobile-screen mr-2"></i> Instal Aplikasi
+            </button>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white px-5 py-3 rounded-2xl shadow-2xl opacity-0 transition-all z-[110] text-[10px] text-center min-w-[200px]"></div>
+    <!-- PWA Install Modal (iOS) -->
+    <div id="installModal" class="hidden fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-xs rounded-[32px] p-6 shadow-2xl text-center space-y-4 animate-in fade-in zoom-in duration-300">
+            <div class="w-20 h-20 bg-indigo-100 rounded-3xl mx-auto flex items-center justify-center text-indigo-600 text-4xl">
+                <i class="fas fa-magic"></i>
+            </div>
+            <h3 class="text-xl font-bold">Simpan ke HP</h3>
+            <p class="text-slate-500 text-xs">Akses dunia imajinasi langsung dari layar utama HP kamu!</p>
+            <div id="iosInstructions" class="text-left bg-slate-50 p-4 rounded-2xl space-y-2 text-[10px] border border-slate-100">
+                <p class="font-bold text-indigo-600">Langkah-langkah:</p>
+                <ol class="list-decimal list-inside space-y-1 text-slate-600">
+                    <li>Klik tombol <strong>'Bagikan'</strong> (kotak panah atas).</li>
+                    <li>Pilih <strong>'Tambah ke Layar Utama'</strong>.</li>
+                </ol>
+            </div>
+            <button id="closeModal" class="w-full bg-slate-900 text-white font-bold py-3 rounded-2xl active-tap">Siap!</button>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900/95 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-all z-[110] text-xs font-medium pointer-events-none"></div>
 
     <script type="module">
+        // API Configuration (Empty Key as per instructions)
         const apiKey = ""; 
 
         const el = {
@@ -157,8 +176,6 @@
             btnClearAll: document.getElementById('btnClearAll'),
             btnInstall: document.getElementById('btnInstall'),
             installModal: document.getElementById('installModal'),
-            iosInstructions: document.getElementById('iosInstructions'),
-            modalAction: document.getElementById('modalInstallAction'),
             closeModal: document.getElementById('closeModal'),
             inputTitle: document.getElementById('storyTitle'),
             welcome: document.getElementById('welcomeMessage'),
@@ -177,7 +194,7 @@
         let audioPlayer = new Audio();
         let deferredPrompt = null;
 
-        // --- PWA ---
+        // --- PWA LOGIC ---
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
@@ -185,116 +202,104 @@
         });
 
         el.btnInstall.onclick = () => {
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-            el.installModal.classList.remove('hidden');
-            if (isIOS) {
-                el.iosInstructions.classList.remove('hidden');
-                el.modalAction.classList.add('hidden');
-            }
-        };
-
-        el.modalAction.onclick = async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') el.btnInstall.classList.add('hidden');
-                deferredPrompt = null;
-                el.installModal.classList.add('hidden');
+                deferredPrompt.userChoice.then(choice => {
+                    if (choice.outcome === 'accepted') el.btnInstall.classList.add('hidden');
+                    deferredPrompt = null;
+                });
+            } else {
+                el.installModal.classList.remove('hidden');
             }
         };
-
         el.closeModal.onclick = () => el.installModal.classList.add('hidden');
 
-        // --- CORE ---
+        // --- CORE UTILS ---
         function showToast(msg) {
             el.toast.innerText = msg;
             el.toast.classList.replace('opacity-0', 'opacity-100');
             setTimeout(() => el.toast.classList.replace('opacity-100', 'opacity-0'), 3000);
         }
 
-        async function safeFetchAI(url, body) {
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
-                
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body),
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                if (res.ok) return await res.json();
-            } catch (e) {
-                console.error("Fetch error:", e);
+        async function callGemini(url, payload, retries = 5) {
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (res.ok) return await res.json();
+                } catch (e) {
+                    if (i === retries - 1) return null;
+                    await new Promise(r => setTimeout(r, delays[i]));
+                }
             }
             return null;
         }
 
+        // --- GENERATION LOGIC ---
         el.btnGenerate.onclick = async () => {
             const title = el.inputTitle.value.trim();
-            if (!title) return showToast("Sebutkan judulnya dulu ya!");
+            if (!title) return showToast("Sebutkan judul ceritanya dulu!");
 
+            // Prepare UI
             el.loader.classList.remove('hidden');
             el.welcome.classList.add('hidden');
             el.content.classList.add('hidden');
-            el.loaderText.innerText = "Merangkai kalimat ajaib...";
+            el.img.classList.add('opacity-0');
+            el.imgLoading.classList.remove('hidden');
+            el.loaderText.innerText = "Gemini sedang berimajinasi...";
 
-            // Task 1: Generate Story (Primary)
-            const storyRes = await safeFetchAI(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                contents: [{ parts: [{ text: `Buatkan cerita anak pendek yang sangat seru dan mendidik tentang: ${title}. Sisipkan efek suara seperti [suara tawa] di dalam teks. Minimal 200 kata bahasa Indonesia.` }] }]
+            // Parallel Process
+            const storyTask = callGemini(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                contents: [{ parts: [{ text: `Buatkan cerita anak pendek yang sangat seru, mendidik, dan penuh imajinasi tentang: ${title}. Sisipkan instruksi efek suara seperti [suara tawa ceria] di dalam teks. Minimal 250 kata dalam bahasa Indonesia.` }] }],
+                tools: [{ "google_search": {} }] // Grounding with search for better details
             });
 
-            if (!storyRes) {
-                showToast("Sihir AI sedang macet. Periksa internetmu!");
-                el.loader.classList.add('hidden');
-                el.welcome.classList.remove('hidden');
-                return;
-            }
-
-            const storyText = storyRes.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (!storyText) {
-                showToast("Peri cerita sedang istirahat. Coba lagi!");
-                el.loader.classList.add('hidden');
-                return;
-            }
-
-            // Display story immediately
-            currentStory = { id: Date.now(), title, body: storyText, image: null };
-            displayStory(currentStory);
-            el.loader.classList.add('hidden');
-
-            // Task 2: Generate Image (Background)
-            el.img.classList.add('hidden');
-            el.imgLoading.classList.remove('hidden');
-            
-            const imageRes = await safeFetchAI(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
-                instances: { prompt: `Children book illustration for story titled "${title}", vibrant colors, 3D clay animation style, magical atmosphere.` },
+            const imageTask = callGemini(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
+                instances: [{ prompt: `Professional whimsical children's book illustration for story titled "${title}", vibrant colors, magical 3D animated movie style, happy characters, highly detailed, no text.` }],
                 parameters: { sampleCount: 1 }
             });
 
-            if (imageRes && imageRes.predictions?.[0]?.bytesBase64Encoded) {
-                currentStory.image = `data:image/png;base64,${imageRes.predictions[0].bytesBase64Encoded}`;
-                el.img.src = currentStory.image;
-                el.img.classList.remove('hidden');
-                el.imgLoading.classList.add('hidden');
+            const [storyRes, imageRes] = await Promise.all([storyTask, imageTask]);
+
+            if (storyRes && storyRes.candidates?.[0]?.content?.parts?.[0]?.text) {
+                const storyText = storyRes.candidates[0].content.parts[0].text;
+                currentStory = { id: Date.now(), title, body: storyText, image: null };
+                
+                // Set Image if available
+                if (imageRes && imageRes.predictions?.[0]?.bytesBase64Encoded) {
+                    currentStory.image = `data:image/png;base64,${imageRes.predictions[0].bytesBase64Encoded}`;
+                }
+
+                displayStory(currentStory);
             } else {
-                el.imgLoading.innerHTML = '<span class="text-[8px] text-gray-300">Gagal memuat lukisan</span>';
+                showToast("Duh, peri cerita sedang sibuk. Coba sebentar lagi ya!");
+                el.welcome.classList.remove('hidden');
             }
+            el.loader.classList.add('hidden');
         };
 
         function displayStory(story) {
             el.content.classList.remove('hidden');
             el.title.innerText = story.title;
-            el.body.innerHTML = story.body.replace(/\[(.*?)\]/g, '<span class="text-indigo-600 font-bold italic">[$1]</span>');
+            // Parse sound effects to highlight them
+            el.body.innerHTML = story.body.replace(/\[(.*?)\]/g, '<span class="text-indigo-500 font-bold italic px-1">[$1]</span>');
             
             if (story.image) {
                 el.img.src = story.image;
-                el.img.classList.remove('hidden');
-                el.imgLoading.classList.add('hidden');
+                el.img.onload = () => {
+                    el.img.classList.replace('opacity-0', 'opacity-100');
+                    el.imgLoading.classList.add('hidden');
+                };
+            } else {
+                el.imgLoading.innerHTML = '<span class="text-[10px] italic">Gagal melukis ilustrasi kali ini.</span>';
             }
+            
             audioPlayer.pause();
-            el.btnPlayAudio.innerHTML = '<i class="fas fa-volume-up"></i>';
+            el.btnPlayAudio.innerHTML = '<i class="fas fa-volume-up text-lg"></i>';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -302,13 +307,13 @@
             if (!currentStory) return;
             if (!audioPlayer.paused) {
                 audioPlayer.pause();
-                el.btnPlayAudio.innerHTML = '<i class="fas fa-volume-up"></i>';
+                el.btnPlayAudio.innerHTML = '<i class="fas fa-volume-up text-lg"></i>';
                 return;
             }
 
-            el.btnPlayAudio.innerHTML = '<i class="fas fa-spinner fa-spin text-xs"></i>';
-            const res = await safeFetchAI(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
-                contents: [{ parts: [{ text: `Bacakan dengan ceria: ${currentStory.body.replace(/\[.*?\]/g, "")}` }] }],
+            el.btnPlayAudio.innerHTML = '<i class="fas fa-spinner fa-spin text-lg"></i>';
+            const res = await callGemini(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+                contents: [{ parts: [{ text: `Bacakan dengan suara pendongeng yang ceria dan ekspresif: ${currentStory.body.replace(/\[.*?\]/g, "")}` }] }],
                 generationConfig: {
                     responseModalities: ["AUDIO"],
                     speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }
@@ -319,11 +324,11 @@
                 const pcm = res.candidates[0].content.parts[0].inlineData.data;
                 audioPlayer.src = pcmToWav(pcm, 24000);
                 audioPlayer.play();
-                el.btnPlayAudio.innerHTML = '<i class="fas fa-pause"></i>';
-                audioPlayer.onended = () => el.btnPlayAudio.innerHTML = '<i class="fas fa-volume-up"></i>';
+                el.btnPlayAudio.innerHTML = '<i class="fas fa-pause text-lg"></i>';
+                audioPlayer.onended = () => el.btnPlayAudio.innerHTML = '<i class="fas fa-volume-up text-lg"></i>';
             } else {
-                showToast("Maaf, suara tidak tersedia.");
-                el.btnPlayAudio.innerHTML = '<i class="fas fa-volume-up"></i>';
+                showToast("Maaf, suara pendongeng sedang tidak tersedia.");
+                el.btnPlayAudio.innerHTML = '<i class="fas fa-volume-up text-lg"></i>';
             }
         };
 
@@ -339,30 +344,37 @@
             return URL.createObjectURL(new Blob([w], {type:'audio/wav'}));
         }
 
+        // --- STORAGE ---
         el.btnSave.onclick = () => {
             if (!currentStory) return;
-            const saved = JSON.parse(localStorage.getItem('kid_stories_v2') || '[]');
+            const saved = JSON.parse(localStorage.getItem('gemini_kids_v1') || '[]');
+            if (saved.some(s => s.id === currentStory.id)) return showToast("Sudah ada di koleksi!");
             saved.unshift(currentStory);
-            localStorage.setItem('kid_stories_v2', JSON.stringify(saved.slice(0, 8)));
+            localStorage.setItem('gemini_kids_v1', JSON.stringify(saved.slice(0, 10)));
             renderList();
-            showToast("Tersimpan di Koleksi!");
+            showToast("Berhasil disimpan!");
         };
 
         el.btnClearAll.onclick = () => {
-            if (confirm("Kosongkan koleksi?")) {
-                localStorage.removeItem('kid_stories_v2');
+            if (confirm("Hapus semua koleksi cerita?")) {
+                localStorage.removeItem('gemini_kids_v1');
                 renderList();
             }
         };
 
         function renderList() {
-            const saved = JSON.parse(localStorage.getItem('kid_stories_v2') || '[]');
-            el.list.innerHTML = saved.length ? '' : '<p class="text-gray-400 text-[10px] italic">Belum ada cerita.</p>';
+            const saved = JSON.parse(localStorage.getItem('gemini_kids_v1') || '[]');
+            el.list.innerHTML = saved.length ? '' : '<p class="text-slate-400 text-[10px] italic">Koleksimu kosong.</p>';
             saved.forEach(s => {
                 const div = document.createElement('div');
-                div.className = "p-3 bg-white rounded-xl cursor-pointer border border-gray-100 flex items-center gap-3 active-tap shadow-sm";
+                div.className = "p-3 bg-white/60 rounded-2xl cursor-pointer border border-transparent hover:border-indigo-200 transition-all active-tap shadow-sm flex items-center gap-3";
                 div.onclick = () => displayStory(s);
-                div.innerHTML = `<i class="fas fa-star text-amber-400 text-[10px]"></i><p class="font-bold text-[10px] truncate">${s.title}</p>`;
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-500 flex-shrink-0">
+                        <i class="fas fa-magic text-[10px]"></i>
+                    </div>
+                    <p class="font-bold text-[10px] text-slate-700 truncate">${s.title}</p>
+                `;
                 el.list.appendChild(div);
             });
         }
