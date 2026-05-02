@@ -8,7 +8,7 @@
     <!-- PWA & Mobile Meta Tags -->
     <meta name="theme-color" content="#4f46e5">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Imajinasi">
     
     <!-- App Icons (SVG Data URI) -->
@@ -25,9 +25,7 @@
             background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
             -webkit-tap-highlight-color: transparent;
         }
-        .kids-font {
-            font-family: 'Comic Neue', cursive;
-        }
+        .kids-font { font-family: 'Comic Neue', cursive; }
         .glass-morphism {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
@@ -37,17 +35,15 @@
             border: 4px solid #f3f3f3;
             border-top: 4px solid #4f46e5;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+            width: 40px; height: 40px;
+            animation: spin 0.8s linear infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        /* Mobile adjustment for better touch targets */
-        button, input {
-            min-height: 44px;
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Modal Style */
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
         }
     </style>
 </head>
@@ -55,116 +51,128 @@
 
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
-        <header class="text-center mb-8 flex flex-col items-center">
-            <h1 class="text-3xl md:text-6xl font-bold text-indigo-600 kids-font mb-2">✨ Petualangan Imajinasi ✨</h1>
-            <p class="text-gray-600 mb-4 text-sm md:text-base">Tulis judulmu, biarkan keajaiban terjadi!</p>
+        <header class="text-center mb-6 flex flex-col items-center">
+            <h1 class="text-3xl md:text-5xl font-bold text-indigo-600 kids-font mb-2">✨ Petualangan Imajinasi ✨</h1>
+            <p class="text-gray-600 mb-4 text-xs">Tulis judulmu, buat duniamu!</p>
             
-            <button id="btnInstall" class="hidden bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-full shadow-lg font-bold flex items-center gap-2 transform transition-all active:scale-95 text-sm">
-                <i class="fas fa-download"></i> Pasang di HP
+            <!-- Install Button: Terlihat jika belum terinstall -->
+            <button id="btnInstall" class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-full shadow-lg font-bold flex items-center gap-2 transform transition-all active:scale-95 text-xs animate-bounce">
+                <i class="fas fa-plus-circle"></i> Pasang Aplikasi Ke HP
             </button>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Left Side: Controls -->
-            <div class="lg:col-span-1 space-y-6 order-2 lg:order-1">
-                <div class="glass-morphism p-6 rounded-3xl shadow-xl">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Mulai Cerita Baru</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Judul Cerita</label>
-                            <input type="text" id="storyTitle" placeholder="Contoh: Petualangan Si Kancil di Laut" 
-                                class="w-full p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-indigo-400 outline-none transition-all text-base">
-                        </div>
-                        <button id="btnGenerate" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg transform active:scale-95 transition-all flex items-center justify-center gap-2">
-                            <i class="fas fa-magic"></i> Buat Keajaiban!
-                        </button>
+            <!-- Top for Mobile: Story Viewer -->
+            <div class="lg:col-span-2 order-1 lg:order-2">
+                <div id="displayArea" class="glass-morphism p-4 md:p-8 rounded-3xl shadow-2xl min-h-[450px] flex flex-col items-center justify-center relative overflow-hidden">
+                    <div id="welcomeMessage" class="text-center space-y-4 p-8">
+                        <div class="text-7xl">📚</div>
+                        <h3 class="text-xl font-bold text-gray-500">Ayo Mulai!</h3>
+                        <p class="text-gray-400 text-xs text-balance">Ketikkan judul apa saja di bawah, misal: "Petualangan Ikan Terbang"</p>
                     </div>
-                </div>
 
-                <div class="glass-morphism p-6 rounded-3xl shadow-xl max-h-[400px] overflow-y-auto">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
-                            <i class="fas fa-book-open text-indigo-500"></i> Koleksiku
-                        </h2>
-                        <button id="btnClearAll" class="text-xs text-red-500 hover:underline">Hapus Semua</button>
+                    <div id="loadingOverlay" class="hidden absolute inset-0 bg-white/95 z-20 flex flex-col items-center justify-center rounded-3xl p-6 text-center">
+                        <div class="loader mb-4"></div>
+                        <p id="loadingText" class="text-indigo-600 font-bold text-lg">Menyiapkan keajaiban...</p>
                     </div>
-                    <div id="savedStoriesList" class="space-y-3">
-                        <!-- Cerita lokal akan muncul di sini -->
+
+                    <div id="storyContent" class="hidden w-full space-y-6">
+                        <div class="w-full aspect-video rounded-2xl overflow-hidden bg-gray-100 relative shadow-inner">
+                            <img id="generatedImage" src="" alt="Ilustrasi" class="w-full h-full object-cover hidden">
+                            <div id="imageLoading" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 text-gray-400 gap-2">
+                                <i class="fas fa-magic fa-2x animate-pulse"></i>
+                                <span class="text-xs">Melukis...</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-4 border-b pb-4">
+                            <h2 id="finalTitle" class="text-2xl font-bold text-indigo-700 kids-font flex-1"></h2>
+                            <div class="flex gap-2">
+                                <button id="btnPlayAudio" class="bg-green-500 text-white w-10 h-10 rounded-full shadow-md flex items-center justify-center active:scale-90"><i class="fas fa-play"></i></button>
+                                <button id="btnSave" class="bg-pink-500 text-white w-10 h-10 rounded-full shadow-md flex items-center justify-center active:scale-90"><i class="fas fa-heart"></i></button>
+                            </div>
+                        </div>
+
+                        <div id="storyBody" class="text-base text-gray-700 leading-relaxed space-y-4 whitespace-pre-wrap text-justify"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Side: Display Area -->
-            <div class="lg:col-span-2 order-1 lg:order-2">
-                <div id="displayArea" class="glass-morphism p-4 md:p-8 rounded-3xl shadow-2xl min-h-[500px] flex flex-col items-center justify-center relative">
-                    
-                    <div id="welcomeMessage" class="text-center space-y-4 p-8">
-                        <div class="text-7xl md:text-8xl">📚</div>
-                        <h3 class="text-xl md:text-2xl font-bold text-gray-500">Siap untuk petualangan?</h3>
-                        <p class="text-gray-400 text-sm md:text-base">Masukkan judul impianmu dan tekan tombol "Buat Keajaiban".</p>
+            <!-- Bottom for Mobile: Inputs & History -->
+            <div class="lg:col-span-1 space-y-6 order-2 lg:order-1">
+                <div class="glass-morphism p-6 rounded-3xl shadow-xl">
+                    <h2 class="text-lg font-semibold mb-4">Ketik Judul Cerita</h2>
+                    <div class="space-y-4">
+                        <input type="text" id="storyTitle" placeholder="Contoh: Petualangan Ke Bulan" 
+                            class="w-full p-4 rounded-2xl border border-gray-200 outline-none focus:ring-2 focus:ring-indigo-400 text-base">
+                        <button id="btnGenerate" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95">
+                            <i class="fas fa-wand-sparkles"></i> Buat Keajaiban!
+                        </button>
                     </div>
+                </div>
 
-                    <div id="loadingOverlay" class="hidden absolute inset-0 bg-white/90 z-20 flex flex-col items-center justify-center rounded-3xl p-6 text-center">
-                        <div class="loader mb-4"></div>
-                        <p id="loadingText" class="text-indigo-600 font-bold text-lg">Menenun benang cerita...</p>
+                <div class="glass-morphism p-6 rounded-3xl shadow-xl max-h-[350px] overflow-y-auto">
+                    <div class="flex items-center justify-between mb-4 sticky top-0 bg-white/95 z-10">
+                        <h2 class="text-lg font-semibold text-gray-800">Koleksiku</h2>
+                        <button id="btnClearAll" class="text-[10px] text-red-500 font-bold uppercase tracking-tighter">Reset</button>
                     </div>
-
-                    <div id="storyContent" class="hidden w-full space-y-6">
-                        <div id="imagePlaceholder" class="w-full aspect-video rounded-2xl overflow-hidden bg-gray-100 relative shadow-inner">
-                            <img id="generatedImage" src="" alt="Ilustrasi" class="w-full h-full object-cover hidden">
-                            <div id="imageLoading" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 text-gray-400 gap-2">
-                                <i class="fas fa-palette fa-2x animate-pulse"></i>
-                                <span class="text-xs">Melukis ilustrasi...</span>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
-                            <h2 id="finalTitle" class="text-2xl md:text-3xl font-bold text-indigo-700 kids-font flex-1"></h2>
-                            <div class="flex gap-2">
-                                <button id="btnPlayAudio" class="bg-green-500 hover:bg-green-600 text-white w-12 h-12 rounded-full shadow-md transition-all flex items-center justify-center">
-                                    <i class="fas fa-play"></i>
-                                </button>
-                                <button id="btnSave" class="bg-blue-500 hover:bg-blue-600 text-white w-12 h-12 rounded-full shadow-md transition-all flex items-center justify-center">
-                                    <i class="fas fa-heart"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="storyBody" class="text-base md:text-lg text-gray-700 leading-relaxed space-y-4 whitespace-pre-wrap text-justify">
-                            <!-- Teks cerita -->
-                        </div>
-                    </div>
+                    <div id="savedStoriesList" class="space-y-3"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-2xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 text-sm whitespace-nowrap">
-        Pesan di sini
+    <!-- PWA Installation Modal (For iOS or browsers where prompt is not auto) -->
+    <div id="installModal" class="hidden fixed inset-0 z-[100] modal-overlay flex items-end sm:items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl transform transition-all translate-y-0">
+            <div class="text-center space-y-4">
+                <div class="w-20 h-20 bg-indigo-100 rounded-2xl mx-auto flex items-center justify-center text-indigo-600 text-4xl">
+                    <i class="fas fa-mobile-screen-button"></i>
+                </div>
+                <h3 class="text-xl font-bold">Pasang di Layar Utama</h3>
+                <p class="text-gray-500 text-sm">Gunakan aplikasi ini kapan saja tanpa membuka browser!</p>
+                
+                <!-- iOS Instructions -->
+                <div id="iosInstructions" class="hidden text-left bg-indigo-50 p-4 rounded-2xl space-y-2 text-xs">
+                    <p class="font-bold">Khusus iPhone/Safari:</p>
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li>Tekan tombol <strong>'Share'</strong> (kotak panah ke atas) di bawah.</li>
+                        <li>Gulir ke bawah dan pilih <strong>'Add to Home Screen'</strong>.</li>
+                        <li>Tekan <strong>'Add'</strong> di pojok kanan atas.</li>
+                    </ol>
+                </div>
+
+                <!-- Android/Chrome auto-prompt will be triggered by button if available -->
+                <button id="modalInstallAction" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg">Mulai Instalasi</button>
+                <button id="closeModal" class="w-full text-gray-400 text-sm font-medium py-2">Nanti Saja</button>
+            </div>
+        </div>
     </div>
 
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-2xl shadow-2xl opacity-0 transition-all z-[110] text-xs"></div>
+
     <script type="module">
-        // API Configuration
         const apiKey = ""; 
 
         // State
         let currentStory = null;
         let audioPlayer = new Audio();
-        let deferredPrompt;
+        let deferredPrompt = null;
 
-        // UI Elements
         const el = {
             btnGenerate: document.getElementById('btnGenerate'),
             btnPlayAudio: document.getElementById('btnPlayAudio'),
             btnSave: document.getElementById('btnSave'),
             btnClearAll: document.getElementById('btnClearAll'),
             btnInstall: document.getElementById('btnInstall'),
+            installModal: document.getElementById('installModal'),
+            iosInstructions: document.getElementById('iosInstructions'),
+            modalAction: document.getElementById('modalInstallAction'),
+            closeModal: document.getElementById('closeModal'),
             inputTitle: document.getElementById('storyTitle'),
             welcome: document.getElementById('welcomeMessage'),
             content: document.getElementById('storyContent'),
             loader: document.getElementById('loadingOverlay'),
-            loaderText: document.getElementById('loadingText'),
             body: document.getElementById('storyBody'),
             title: document.getElementById('finalTitle'),
             img: document.getElementById('generatedImage'),
@@ -174,139 +182,124 @@
         };
 
         // --- PWA LOGIC ---
+        // 1. Manifest Injection
+        const manifest = {
+            name: "Petualangan Imajinasi Cerita Anak",
+            short_name: "Imajinasi",
+            start_url: ".",
+            display: "standalone",
+            background_color: "#ffffff",
+            theme_color: "#4f46e5",
+            icons: [{
+                src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%234f46e5'/%3E%3Cpath d='M30 30h40v40H30z' fill='none'/%3E%3Ccircle cx='75' cy='25' r='10' fill='%23fbbf24'/%3E%3C/svg%3E",
+                sizes: "192x192", type: "image/svg+xml"
+            }]
+        };
+        const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        const link = document.createElement('link');
+        link.rel = 'manifest'; link.href = URL.createObjectURL(blob);
+        document.head.appendChild(link);
+
+        // 2. Install Event (Chrome/Android)
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             el.btnInstall.classList.remove('hidden');
         });
 
-        el.btnInstall.addEventListener('click', async () => {
+        // 3. Install Button Click
+        el.btnInstall.onclick = () => {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            el.installModal.classList.remove('hidden');
+            
+            if (isIOS) {
+                el.iosInstructions.classList.remove('hidden');
+                el.modalAction.classList.add('hidden');
+            } else if (deferredPrompt) {
+                el.iosInstructions.classList.add('hidden');
+                el.modalAction.classList.remove('hidden');
+            } else {
+                // Browser lain tapi fitur PWA aktif
+                el.iosInstructions.classList.remove('hidden');
+                el.iosInstructions.innerHTML = "<p>Klik ikon titik tiga di browser Anda, lalu pilih <strong>'Instal Aplikasi'</strong> atau <strong>'Tambahkan ke Layar Utama'</strong>.</p>";
+                el.modalAction.classList.add('hidden');
+            }
+        };
+
+        el.modalAction.onclick = async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') el.btnInstall.classList.add('hidden');
                 deferredPrompt = null;
+                el.installModal.classList.add('hidden');
             }
-        });
+        };
+
+        el.closeModal.onclick = () => el.installModal.classList.add('hidden');
+
+        // Check if already installed
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+            el.btnInstall.classList.add('hidden');
+        }
 
         // --- UTILS ---
         function showToast(msg) {
             el.toast.innerText = msg;
-            el.toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => el.toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+            el.toast.classList.replace('opacity-0', 'opacity-100');
+            setTimeout(() => el.toast.classList.replace('opacity-100', 'opacity-0'), 3000);
         }
 
-        async function fetchWithRetry(url, body, retries = 5) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const res = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(body)
-                    });
-                    if (res.ok) return await res.json();
-                    await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
-                } catch (e) {
-                    if (i === retries - 1) throw e;
-                }
-            }
-        }
-
-        // --- STORY LOGIC ---
-        async function generateAIStory(title) {
-            const prompt = `Buatkan cerita anak yang seru, penuh imajinasi, dan mengandung pesan moral berdasarkan judul: "${title}". Gunakan bahasa Indonesia yang ceria. Sisipkan efek suara dalam kurung siku seperti [suara tawa] atau [suara angin] untuk menandakan suasana. Minimal 200 kata.`;
-            
-            const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                contents: [{ parts: [{ text: prompt }] }]
-            });
-            return res.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, sihirnya sedang macet. Coba lagi ya!";
-        }
-
-        async function generateAIImage(text, title) {
-            const prompt = `Children's book illustration for: ${title}. High quality, vibrant colors, 3D animated movie style, happy atmosphere. No text in image. Context: ${text.substring(0, 200)}`;
+        async function fetchAI(url, body) {
             try {
-                const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
-                    instances: { prompt: prompt },
-                    parameters: { sampleCount: 1 }
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
                 });
-                return `data:image/png;base64,${res.predictions[0].bytesBase64Encoded}`;
-            } catch (e) {
-                return null;
+                if (res.ok) return await res.json();
+            } catch (e) { console.error(e); }
+            return null;
+        }
+
+        // --- CORE FEATURES ---
+        el.btnGenerate.onclick = async () => {
+            const title = el.inputTitle.value.trim();
+            if (!title) return showToast("Judulnya masih kosong!");
+
+            el.loader.classList.remove('hidden');
+            el.welcome.classList.add('hidden');
+            el.content.classList.add('hidden');
+
+            // Parallel Execution
+            const storyTask = fetchAI(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                contents: [{ parts: [{ text: `Buatkan cerita anak pendek bahasa Indonesia yang sangat seru dan bermakna tentang: ${title}. Sisipkan efek suara dalam [kurung siku]. Minimal 250 kata.` }] }]
+            });
+
+            const imageTask = fetchAI(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
+                instances: { prompt: `Children book illustration for ${title}, vibrant, magical 3D animation style.` },
+                parameters: { sampleCount: 1 }
+            });
+
+            const [storyRes, imageRes] = await Promise.all([storyTask, imageTask]);
+
+            if (storyRes) {
+                const text = storyRes.candidates[0].content.parts[0].text;
+                const img = imageRes ? `data:image/png;base64,${imageRes.predictions[0].bytesBase64Encoded}` : null;
+                
+                currentStory = { id: Date.now(), title, body: text, image: img };
+                displayStory(currentStory);
+            } else {
+                showToast("Sihir AI sedang kelelahan. Coba lagi!");
+                el.welcome.classList.remove('hidden');
             }
-        }
-
-        async function generateAIVoice(text) {
-            const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
-                contents: [{ parts: [{ text: `Bacakan dengan suara ceria seperti pendongeng: ${text.replace(/\[.*?\]/g, "")}` }] }],
-                generationConfig: {
-                    responseModalities: ["AUDIO"],
-                    speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }
-                }
-            });
-            const pcm = res.candidates[0].content.parts[0].inlineData.data;
-            return pcmToWav(pcm, 24000);
-        }
-
-        function pcmToWav(base64Pcm, sampleRate) {
-            const pcm = Uint8Array.from(atob(base64Pcm), c => c.charCodeAt(0));
-            const wav = new Uint8Array(44 + pcm.length);
-            const view = new DataView(wav.buffer);
-            view.setUint32(0, 0x52494646, false); // RIFF
-            view.setUint32(4, 36 + pcm.length, true);
-            view.setUint32(8, 0x57415645, false); // WAVE
-            view.setUint32(12, 0x666d7420, false); // fmt
-            view.setUint32(16, 16, true);
-            view.setUint16(20, 1, true); // PCM
-            view.setUint16(22, 1, true); // Mono
-            view.setUint32(24, sampleRate, true);
-            view.setUint32(28, sampleRate * 2, true);
-            view.setUint16(32, 2, true);
-            view.setUint16(34, 16, true);
-            view.setUint32(36, 0x64617461, false); // data
-            view.setUint32(40, pcm.length, true);
-            wav.set(pcm, 44);
-            return URL.createObjectURL(new Blob([wav], { type: 'audio/wav' }));
-        }
-
-        // --- STORAGE LOGIC ---
-        function getSavedStories() {
-            return JSON.parse(localStorage.getItem('my_magic_stories') || '[]');
-        }
-
-        function saveStoryToLocal(story) {
-            const stories = getSavedStories();
-            stories.unshift(story);
-            localStorage.setItem('my_magic_stories', JSON.stringify(stories.slice(0, 20))); // Simpan max 20
-            renderList();
-        }
-
-        function renderList() {
-            const stories = getSavedStories();
-            el.list.innerHTML = stories.length ? '' : '<p class="text-gray-400 text-xs italic">Belum ada koleksi...</p>';
-            
-            stories.forEach((s, idx) => {
-                const item = document.createElement('div');
-                item.className = "p-3 bg-white hover:bg-indigo-50 rounded-xl cursor-pointer transition-all border border-gray-100 flex items-center gap-3 active:scale-95";
-                item.onclick = () => displayStory(s);
-                item.innerHTML = `
-                    <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-500 flex-shrink-0">
-                        <i class="fas fa-magic text-sm"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="font-bold text-gray-800 text-sm truncate">${s.title}</p>
-                        <p class="text-[10px] text-gray-400">${new Date(s.id).toLocaleDateString()}</p>
-                    </div>
-                `;
-                el.list.appendChild(item);
-            });
-        }
+            el.loader.classList.add('hidden');
+        };
 
         function displayStory(story) {
-            currentStory = story;
-            el.welcome.classList.add('hidden');
             el.content.classList.remove('hidden');
             el.title.innerText = story.title;
-            el.body.innerHTML = story.body.replace(/\[(.*?)\]/g, '<span class="text-indigo-500 font-bold italic">[$1]</span>');
+            el.body.innerHTML = story.body.replace(/\[(.*?)\]/g, '<span class="text-indigo-600 font-bold italic">[$1]</span>');
             
             if (story.image) {
                 el.img.src = story.image;
@@ -316,43 +309,11 @@
                 el.img.classList.add('hidden');
                 el.imgLoading.classList.remove('hidden');
             }
-            
-            audioPlayer.pause();
-            el.btnPlayAudio.innerHTML = '<i class="fas fa-play"></i>';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- ACTIONS ---
-        el.btnGenerate.onclick = async () => {
-            const title = el.inputTitle.value.trim();
-            if (!title) return showToast("Sebutkan judulnya dulu ya!");
-
-            el.loader.classList.remove('hidden');
-            el.loaderText.innerText = "Menenun benang cerita...";
-            
-            try {
-                const text = await generateAIStory(title);
-                el.loaderText.innerText = "Melukis dunia imajinasi...";
-                const image = await generateAIImage(text, title);
-
-                const newStory = {
-                    id: Date.now(),
-                    title: title,
-                    body: text,
-                    image: image
-                };
-
-                displayStory(newStory);
-            } catch (e) {
-                showToast("Sihir AI sedang lelah, coba lagi ya!");
-            } finally {
-                el.loader.classList.add('hidden');
-            }
-        };
-
         el.btnPlayAudio.onclick = async () => {
             if (!currentStory) return;
-            
             if (!audioPlayer.paused) {
                 audioPlayer.pause();
                 el.btnPlayAudio.innerHTML = '<i class="fas fa-play"></i>';
@@ -360,32 +321,66 @@
             }
 
             el.btnPlayAudio.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            try {
-                const url = await generateAIVoice(currentStory.body);
-                audioPlayer.src = url;
+            const res = await fetchAI(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+                contents: [{ parts: [{ text: `Bacakan dengan nada ceria: ${currentStory.body.replace(/\[.*?\]/g, "")}` }] }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }
+                }
+            });
+
+            if (res) {
+                const pcm = res.candidates[0].content.parts[0].inlineData.data;
+                audioPlayer.src = pcmToWav(pcm, 24000);
                 audioPlayer.play();
                 el.btnPlayAudio.innerHTML = '<i class="fas fa-pause"></i>';
                 audioPlayer.onended = () => el.btnPlayAudio.innerHTML = '<i class="fas fa-play"></i>';
-            } catch (e) {
-                showToast("Suaranya lagi habis!");
+            } else {
+                showToast("Suara tidak tersedia.");
                 el.btnPlayAudio.innerHTML = '<i class="fas fa-play"></i>';
             }
         };
 
+        function pcmToWav(base64, rate) {
+            const p = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+            const w = new Uint8Array(44 + p.length);
+            const v = new DataView(w.buffer);
+            v.setUint32(0, 0x52494646, false); v.setUint32(4, 36+p.length, true); v.setUint32(8, 0x57415645, false);
+            v.setUint32(12, 0x666d7420, false); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+            v.setUint16(22, 1, true); v.setUint32(24, rate, true); v.setUint32(28, rate*2, true);
+            v.setUint16(32, 2, true); v.setUint16(34, 16, true); v.setUint32(36, 0x64617461, false);
+            v.setUint32(40, p.length, true); w.set(p, 44);
+            return URL.createObjectURL(new Blob([w], {type:'audio/wav'}));
+        }
+
         el.btnSave.onclick = () => {
             if (!currentStory) return;
-            saveStoryToLocal(currentStory);
-            showToast("Berhasil disimpan ke Koleksiku!");
+            const saved = JSON.parse(localStorage.getItem('kid_stories') || '[]');
+            saved.unshift(currentStory);
+            localStorage.setItem('kid_stories', JSON.stringify(saved.slice(0, 10)));
+            renderList();
+            showToast("Tersimpan di Koleksiku!");
         };
 
         el.btnClearAll.onclick = () => {
-            if (confirm("Hapus semua koleksi cerita?")) {
-                localStorage.removeItem('my_magic_stories');
+            if (confirm("Hapus semua koleksi?")) {
+                localStorage.removeItem('kid_stories');
                 renderList();
             }
         };
 
-        // Init
+        function renderList() {
+            const saved = JSON.parse(localStorage.getItem('kid_stories') || '[]');
+            el.list.innerHTML = saved.length ? '' : '<p class="text-gray-400 text-[10px] italic">Belum ada cerita.</p>';
+            saved.forEach(s => {
+                const div = document.createElement('div');
+                div.className = "p-3 bg-white rounded-xl cursor-pointer border border-gray-100 flex items-center gap-3 active:scale-95";
+                div.onclick = () => displayStory(s);
+                div.innerHTML = `<i class="fas fa-magic text-indigo-400"></i><p class="font-bold text-xs truncate">${s.title}</p>`;
+                el.list.appendChild(div);
+            });
+        }
+
         renderList();
     </script>
 </body>
