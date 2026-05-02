@@ -22,47 +22,47 @@
         
         body {
             font-family: 'Quicksand', sans-serif;
-            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+            background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
             -webkit-tap-highlight-color: transparent;
             overflow-x: hidden;
         }
         .kids-font { font-family: 'Comic Neue', cursive; }
         .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
         .loader {
             border: 5px solid #f3f3f3;
             border-top: 5px solid #6366f1;
             border-radius: 50%;
-            width: 50px; height: 50px;
+            width: 45px; height: 45px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .active-tap:active { transform: scale(0.94); transition: transform 0.1s; }
-        .story-body { line-height: 1.9; color: #1e293b; }
+        .story-body { line-height: 1.8; color: #1e293b; }
         
         @media (max-width: 768px) {
-            .safe-bottom { padding-bottom: 120px; }
+            .safe-bottom { padding-bottom: 140px; }
             .sticky-input {
                 position: fixed;
-                bottom: 15px;
-                left: 10px;
-                right: 10px;
+                bottom: 20px;
+                left: 15px;
+                right: 15px;
                 z-index: 50;
             }
         }
     </style>
 </head>
-<body class="min-h-screen p-3 md:p-8 safe-bottom">
+<body class="min-h-screen p-4 md:p-8 safe-bottom">
 
     <div class="max-w-4xl mx-auto">
         <!-- Header -->
         <header class="text-center mb-6 flex flex-col items-center">
-            <h1 class="text-3xl md:text-5xl font-bold text-indigo-600 kids-font mb-2 drop-shadow-sm">✨ Petualangan Imajinasi ✨</h1>
-            <div class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-[9px] font-extrabold tracking-widest uppercase shadow-sm">
-                Didukung oleh Gemini 1.5 Flash
+            <h1 class="text-3xl md:text-5xl font-bold text-indigo-600 kids-font mb-2">✨ Petualangan Imajinasi ✨</h1>
+            <div class="bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-sm">
+                Versi Stabil v1.0
             </div>
         </header>
 
@@ -71,10 +71,10 @@
             
             <!-- Welcome View -->
             <div id="welcomeView" class="text-center space-y-6 my-auto">
-                <div class="text-8xl animate-bounce duration-[2000ms]">🚀</div>
+                <div class="text-8xl animate-bounce">🚀</div>
                 <h3 class="text-2xl font-bold text-slate-800">Ayo Mulai Petualangan!</h3>
                 <p class="text-slate-500 text-sm max-w-xs mx-auto leading-relaxed">
-                    Ketik judul apa saja di bawah, lalu tekan tombol ajaib untuk membuat cerita.
+                    Ketik judul apa saja di bawah, peri Gemini akan segera membuatkan cerita ajaib.
                 </p>
             </div>
 
@@ -82,17 +82,17 @@
             <div id="loadingOverlay" class="hidden absolute inset-0 bg-white/95 z-40 flex flex-col items-center justify-center p-8 text-center">
                 <div class="loader mb-6"></div>
                 <p id="loadingText" class="text-indigo-600 font-bold text-lg mb-1">Peri sedang bekerja...</p>
-                <p class="text-slate-400 text-[10px] italic">Sihir sedang merangkai kata dan warna...</p>
+                <p class="text-slate-400 text-[10px] italic">Merangkai kata-kata ajaib untukmu...</p>
             </div>
 
             <!-- Story View -->
             <div id="storyView" class="hidden w-full space-y-6">
                 <!-- Image -->
-                <div class="w-full aspect-[16/10] rounded-[2rem] overflow-hidden bg-slate-200 relative shadow-lg">
+                <div class="w-full aspect-[16/10] rounded-[2rem] overflow-hidden bg-slate-200 relative shadow-md">
                     <img id="storyImg" src="" alt="Ilustrasi Cerita" class="w-full h-full object-cover opacity-0 transition-opacity duration-1000">
                     <div id="imgLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-100 text-slate-400 gap-3">
                         <i class="fas fa-magic fa-2xl animate-pulse text-indigo-300"></i>
-                        <span class="text-[10px] font-bold uppercase">Melukis...</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Sedang melukis...</span>
                     </div>
                 </div>
 
@@ -110,59 +110,60 @@
                 </div>
 
                 <!-- Body -->
-                <div id="displayBody" class="story-body text-base md:text-xl space-y-6 whitespace-pre-wrap text-justify pb-10"></div>
+                <div id="displayBody" class="story-body text-base md:text-xl space-y-6 whitespace-pre-wrap text-justify pb-10 px-1"></div>
             </div>
         </div>
 
-        <!-- Inputs -->
+        <!-- Inputs Section -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div class="md:col-span-2">
                 <div class="glass-card p-3 rounded-[2rem] shadow-xl sticky-input">
                     <div class="flex gap-2">
-                        <input type="text" id="inputTitle" placeholder="Misal: Petualangan Naga Hijau..." 
-                            class="flex-1 p-4 rounded-2xl border-none bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-400 text-sm shadow-inner font-semibold">
-                        <button id="btnAction" class="bg-indigo-600 text-white w-14 rounded-2xl shadow-lg flex items-center justify-center active-tap transition-colors">
+                        <input type="text" id="inputTitle" placeholder="Misal: Kucing Sakti Bisa Terbang..." 
+                            class="flex-1 p-4 rounded-2xl border-none bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-400 text-base shadow-inner font-semibold">
+                        <button id="btnAction" class="bg-indigo-600 text-white w-14 rounded-2xl shadow-lg flex items-center justify-center active-tap">
                             <i class="fas fa-wand-sparkles text-lg"></i>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- History -->
+            <!-- Koleksi -->
             <div class="md:col-span-1">
-                <div class="glass-card p-5 rounded-[2rem] shadow-xl max-h-[250px] overflow-y-auto">
+                <div class="glass-card p-5 rounded-[2.5rem] shadow-xl max-h-[250px] overflow-y-auto">
                     <div class="flex items-center justify-between mb-3 sticky top-0 bg-white/95 z-10 py-1">
-                        <h2 class="text-xs font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fas fa-star text-amber-400"></i> Koleksi
-                        </h2>
-                        <button id="btnReset" class="text-[9px] font-bold text-red-500 uppercase">Hapus</button>
+                        <h2 class="text-xs font-bold text-slate-800">📖 Koleksiku</h2>
+                        <button id="btnReset" class="text-[9px] font-bold text-red-500 uppercase tracking-tighter">Hapus Semua</button>
                     </div>
-                    <div id="historyList" class="space-y-2"></div>
+                    <div id="historyList" class="space-y-2">
+                        <!-- History items -->
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- PWA Button -->
-        <div class="mt-8 text-center">
-            <button id="btnPWA" class="hidden bg-slate-800 text-white px-6 py-2 rounded-full text-[10px] font-bold active-tap shadow-lg">
-                <i class="fas fa-mobile-screen mr-2"></i> Instal Aplikasi
+        <!-- Install Prompt -->
+        <div class="mt-10 text-center">
+            <button id="btnPWA" class="hidden bg-slate-800 text-white px-8 py-3 rounded-full text-[10px] font-bold active-tap shadow-lg">
+                <i class="fas fa-mobile-screen mr-2"></i> Pasang di HP
             </button>
         </div>
     </div>
 
-    <!-- iOS Modal -->
+    <!-- iOS Install Help -->
     <div id="iosModal" class="hidden fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-xs rounded-[2.5rem] p-6 shadow-2xl text-center space-y-4">
+        <div class="bg-white w-full max-w-xs rounded-[2.5rem] p-8 shadow-2xl text-center space-y-4">
             <h3 class="text-xl font-bold">Pasang di HP</h3>
-            <p class="text-slate-500 text-xs">Tekan tombol 'Bagikan' di browser Anda lalu pilih 'Add to Home Screen'.</p>
-            <button id="btnOk" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl active-tap">Mengerti</button>
+            <p class="text-slate-500 text-xs leading-relaxed">Klik tombol <strong>'Bagikan'</strong> di browser Anda lalu pilih <strong>'Add to Home Screen'</strong>.</p>
+            <button id="btnOk" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-2xl active-tap">Mengerti</button>
         </div>
     </div>
 
-    <!-- Toast Notif -->
-    <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-900/95 text-white px-6 py-3 rounded-2xl shadow-2xl opacity-0 transition-all z-[110] text-[10px] font-bold pointer-events-none text-center min-w-[250px]"></div>
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-10 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-all z-[110] text-[10px] font-bold pointer-events-none text-center min-w-[260px]"></div>
 
     <script type="module">
+        // API Key yang Anda Berikan
         const apiKey = "AIzaSyCczkG0Gf4fQFkJqsoJa9LiWfabZsC0kjg"; 
 
         const el = {
@@ -177,7 +178,6 @@
             welcome: document.getElementById('welcomeView'),
             storyView: document.getElementById('storyView'),
             loader: document.getElementById('loadingOverlay'),
-            loaderText: document.getElementById('loadingText'),
             displayBody: document.getElementById('displayBody'),
             displayTitle: document.getElementById('displayTitle'),
             img: document.getElementById('storyImg'),
@@ -190,7 +190,7 @@
         let audioPlayer = new Audio();
         let deferredPrompt = null;
 
-        // PWA
+        // PWA setup
         if ('serviceWorker' in navigator) {
             const sw = `self.addEventListener('fetch', e => {})`;
             const blob = new Blob([sw], { type: 'text/javascript' });
@@ -213,39 +213,30 @@
         function showToast(msg) {
             el.toast.innerText = msg;
             el.toast.classList.replace('opacity-0', 'opacity-100');
-            setTimeout(() => el.toast.classList.replace('opacity-100', 'opacity-0'), 4000);
+            setTimeout(() => el.toast.classList.replace('opacity-100', 'opacity-0'), 4500);
         }
 
         async function callAPI(url, payload) {
-            const retryDelays = [1000, 2000, 4000];
-            for (let i = 0; i < retryDelays.length; i++) {
-                try {
-                    const res = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    
-                    if (res.ok) return await res.json();
-                    
-                    const errorData = await res.json().catch(() => ({}));
-                    if (res.status === 403 || res.status === 401) return { error: true, code: res.status, message: "Kunci API Ditolak" };
-                    if (res.status === 404) return { error: true, code: 404, message: "Model Tidak Ditemukan" };
-                    if (res.status === 429) return { error: true, code: 429, message: "Terlalu Banyak Permintaan" };
-                    
-                    await new Promise(r => setTimeout(r, retryDelays[i]));
-                } catch (e) {
-                    if (i === retryDelays.length - 1) return { error: true, message: "Masalah Koneksi Internet" };
-                    await new Promise(r => setTimeout(r, retryDelays[i]));
-                }
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (res.ok) return await res.json();
+                
+                const err = await res.json().catch(() => ({}));
+                return { error: true, code: res.status, message: err.error?.message || "Kesalahan Tidak Diketahui" };
+            } catch (e) {
+                return { error: true, message: "Koneksi Bermasalah" };
             }
-            return { error: true, message: "Sihir Gagal (Unknown Error)" };
         }
 
-        // Action
+        // Logic Utama
         el.btnAction.onclick = async () => {
             const title = el.input.value.trim();
-            if (!title) return showToast("Masukkan judul ceritanya ya! ✨");
+            if (!title) return showToast("Sebutkan judul ceritanya dulu ya! ✨");
 
             el.loader.classList.remove('hidden');
             el.welcome.classList.add('hidden');
@@ -253,20 +244,21 @@
             el.img.classList.add('opacity-0');
             el.imgLoader.classList.remove('hidden');
 
-            // 1. Cerita (Gunakan model yang lebih stabil)
-            const storyRes = await callAPI(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-                contents: [{ parts: [{ text: `Buat cerita anak pendek Bahasa Indonesia yang sangat seru tentang: ${title}. Sisipkan efek suara seperti [suara tawa] dalam teks. Minimal 250 kata.` }] }]
+            // 1. Ambil Cerita (v1 stable endpoint)
+            const storyRes = await callAPI(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                contents: [{ parts: [{ text: `Tulis cerita anak pendek Bahasa Indonesia yang seru, penuh imajinasi, dan mendidik tentang: ${title}. Sisipkan efek suara seperti [suara tawa] dalam teks. Minimal 250 kata.` }] }]
             });
 
             if (storyRes && !storyRes.error) {
                 const text = storyRes.candidates[0].content.parts[0].text;
                 currentStory = { id: Date.now(), title, body: text, image: null };
+                
                 displayStory(currentStory);
                 el.loader.classList.add('hidden');
 
-                // 2. Gambar
+                // 2. Ambil Gambar (Imagen v3/v1 via v1beta predict)
                 const imgRes = await callAPI(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${apiKey}`, {
-                    instances: [{ prompt: `Magical illustration for children's story "${title}", colorful, 3D style.` }]
+                    instances: [{ prompt: `Whimsical magical illustration for children's story "${title}", vibrant soft colors, high quality digital art style, no text.` }]
                 }).catch(() => null);
 
                 if (imgRes && imgRes.predictions?.[0]?.bytesBase64Encoded) {
@@ -274,12 +266,11 @@
                     el.img.src = currentStory.image;
                     el.img.onload = () => { el.img.classList.replace('opacity-0', 'opacity-100'); el.imgLoader.classList.add('hidden'); };
                 } else {
-                    el.imgLoader.innerHTML = '<span class="text-[9px] font-bold text-slate-300">Gambar Tidak Tersedia</span>';
+                    el.imgLoader.innerHTML = '<span class="text-[9px] font-bold text-slate-300">Gambar Gagal Dilukis</span>';
                 }
             } else {
-                const msg = storyRes?.message || "Terjadi Kesalahan";
                 const code = storyRes?.code ? ` (${storyRes.code})` : "";
-                showToast(`Gagal: ${msg}${code}`);
+                showToast(`Waduh! Peri sedang sibuk: ${storyRes?.message}${code}`);
                 el.loader.classList.add('hidden');
                 el.welcome.classList.remove('hidden');
             }
@@ -288,7 +279,8 @@
         function displayStory(story) {
             el.storyView.classList.remove('hidden');
             el.displayTitle.innerText = story.title;
-            el.displayBody.innerHTML = story.body.replace(/\[(.*?)\]/g, '<span class="text-indigo-600 font-bold italic">[$1]</span>');
+            el.displayBody.innerHTML = story.body.replace(/\[(.*?)\]/g, '<span class="text-indigo-600 font-bold italic px-1">[$1]</span>');
+            
             if (story.image) {
                 el.img.src = story.image;
                 el.img.classList.replace('opacity-0', 'opacity-100');
@@ -304,8 +296,8 @@
             if (!audioPlayer.paused) { audioPlayer.pause(); el.btnVoice.innerHTML = '<i class="fas fa-volume-up"></i>'; return; }
 
             el.btnVoice.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            const res = await callAPI(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-                contents: [{ parts: [{ text: `Bacakan dengan nada ceria: ${currentStory.body.replace(/\[.*?\]/g, "")}` }] }],
+            const res = await callAPI(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                contents: [{ parts: [{ text: `Bacakan cerita ini dengan nada pendongeng yang ceria: ${currentStory.body.replace(/\[.*?\]/g, "")}` }] }],
                 generationConfig: {
                     responseModalities: ["AUDIO"],
                     speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }
@@ -319,7 +311,7 @@
                 el.btnVoice.innerHTML = '<i class="fas fa-pause"></i>';
                 audioPlayer.onended = () => el.btnVoice.innerHTML = '<i class="fas fa-volume-up"></i>';
             } else {
-                showToast("Maaf, suara tidak tersedia 🎙️");
+                showToast("Maaf, suara pendongeng tidak tersedia 🎙️");
                 el.btnVoice.innerHTML = '<i class="fas fa-volume-up"></i>';
             }
         };
@@ -338,24 +330,24 @@
 
         el.btnSave.onclick = () => {
             if (!currentStory) return;
-            const saved = JSON.parse(localStorage.getItem('story_magic_v3') || '[]');
-            if (saved.some(s => s.id === currentStory.id)) return showToast("Sudah disimpan ✨");
+            const saved = JSON.parse(localStorage.getItem('magic_stories_v4') || '[]');
+            if (saved.some(s => s.id === currentStory.id)) return showToast("Sudah ada di koleksi ✨");
             saved.unshift(currentStory);
-            localStorage.setItem('story_magic_v3', JSON.stringify(saved.slice(0, 10)));
+            localStorage.setItem('magic_stories_v4', JSON.stringify(saved.slice(0, 10)));
             renderList();
-            showToast("Tersimpan! ❤️");
+            showToast("Berhasil disimpan! ❤️");
         };
 
-        el.btnReset.onclick = () => { if (confirm("Hapus semua?")) { localStorage.removeItem('story_magic_v3'); renderList(); } };
+        el.btnReset.onclick = () => { if (confirm("Hapus semua koleksi?")) { localStorage.removeItem('magic_stories_v4'); renderList(); } };
 
         function renderList() {
-            const saved = JSON.parse(localStorage.getItem('story_magic_v3') || '[]');
-            el.list.innerHTML = saved.length ? '' : '<p class="text-slate-400 text-[9px] italic text-center py-4">Kosong.</p>';
+            const saved = JSON.parse(localStorage.getItem('magic_stories_v4') || '[]');
+            el.list.innerHTML = saved.length ? '' : '<p class="text-slate-400 text-[9px] italic text-center py-4">Koleksi kosong.</p>';
             saved.forEach(s => {
                 const item = document.createElement('div');
-                item.className = "p-3 bg-white/60 rounded-xl cursor-pointer border border-transparent shadow-sm flex items-center gap-2 active-tap";
+                item.className = "p-3 bg-white/70 rounded-2xl cursor-pointer border border-transparent shadow-sm flex items-center gap-2 active-tap";
                 item.onclick = () => displayStory(s);
-                item.innerHTML = `<i class="fas fa-sparkles text-amber-400 text-[9px]"></i><p class="font-bold text-[10px] truncate text-slate-700">${s.title}</p>`;
+                item.innerHTML = `<i class="fas fa-book text-indigo-400 text-[9px]"></i><p class="font-bold text-[10px] truncate text-slate-700">${s.title}</p>`;
                 el.list.appendChild(item);
             });
         }
